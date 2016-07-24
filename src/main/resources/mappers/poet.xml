@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.poet.dao.PoetDao">
+    <resultMap id="poet" type="Poet">
+        <result column="write_time" property="writeTime"/>
+    </resultMap>
+
+    <sql id="whereCon">
+        where 1=1
+        <if test="condition.author!=null">
+            and author=#{condition.author}
+        </if>
+        <if test="condition.startTime!=null and condition.endTime==null">
+            and write_time>=#{condition.startTime}
+        </if>
+        <if test="condition.startTime==null and condition.endTime!=null">
+            <![CDATA[ and write_time<= #{endTime} ]]>
+        </if>
+        <if test="condition.startTime!=null and condition.endTime!=null">
+            and write_time between #{condition.startTime} AND #{condition.endTime}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="Poet">
+        insert into poet(title,content,author,write_time)
+        values(#{title},#{content},#{author},#{writeTime});
+        <selectKey resultType="Long" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="query" resultMap="poet">
+        select * from poet
+        <include refid="whereCon"/>
+        <if test="page!=null">
+            limit #{page.startRow},#{page.pageSize}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        select count(1) from poet
+        <include refid="whereCon"/>
+    </select>
+
+</mapper>

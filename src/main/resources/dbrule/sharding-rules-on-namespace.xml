@@ -1,0 +1,28 @@
+<rules>
+    <rule>
+        <namespace>user</namespace>
+        <shards>master</shards>
+    </rule>
+    <rule>
+        <namespace>Shop</namespace>
+        <shards>master</shards>
+    </rule>
+    <rule>
+        <namespace>TradeQueryParams</namespace>
+        <shards>master</shards>
+    </rule>
+    <rule>
+        <namespace>ExpressAreaCost</namespace>
+        <shards>master</shards>
+    </rule>
+    <rule>
+        <namespace>ExpressCompany</namespace>
+        <shards>master</shards>
+    </rule>
+    <rule>
+        <namespace>ExpressCost</namespace>
+        <shards>master</shards>
+    </rule>
+
+
+</rules>
