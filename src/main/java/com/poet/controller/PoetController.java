@@ -30,9 +30,37 @@ public class PoetController {
         return poetService.query(condition);
     }
 
+    /**
+     * 分页查询
+     * @param condition
+     * @param page
+     * @return
+     */
     @RequestMapping("queryPageList")
     @ResponseBody
     public PageList<Poet> queryPageList(PoetCondition condition,Pagination page){
         return poetService.queryPageList(condition, page);
+    }
+
+    /**
+     * 展示页面
+     * @param poet
+     * @return
+     */
+    @RequestMapping("save")
+    @ResponseBody
+    public Integer save(Poet poet){
+        return poetService.insert(poet);
+    }
+
+    /**
+     * 跳转控制器
+     * @param url
+     * @return
+     */
+    @RequestMapping("index")
+    public String index(String url){
+        //System.out.println(System.getProperty("webapp.root"));
+        return url;
     }
 }

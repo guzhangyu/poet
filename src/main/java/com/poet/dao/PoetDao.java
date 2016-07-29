@@ -6,7 +6,6 @@ import com.poet.vo.PoetCondition;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,8 +18,7 @@ public interface PoetDao {
     List<Poet> query(@Param(value="condition") PoetCondition condition,@Param(value="page")Pagination page);
     int count(@Param(value="condition")PoetCondition condition);
 
-
-//    List<Poet> query(@Param(value="condition") PoetCondition condition,@Param(value="page")Pagination page);
-//    int count(@Param(value="condition")PoetCondition condition);
+//    List<Poet> query( PoetCondition condition,Pagination page);
+//    int count(PoetCondition condition);
 
 }

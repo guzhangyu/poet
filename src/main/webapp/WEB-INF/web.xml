@@ -6,8 +6,8 @@
            version="3.0">
     <display-name>poet</display-name>
     <context-param>
-        <param-name>poet</param-name>
-        <param-value>webapp.root</param-value>
+        <param-name>webAppRootKey</param-name>
+        <param-value>webroot</param-value>
     </context-param>
     <context-param>
         <param-name>contextConfigLocation</param-name>
