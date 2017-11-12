@@ -4,6 +4,7 @@ import image.ImageUtil;
 import sun.misc.BASE64Decoder;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.BufferedInputStream;
@@ -19,10 +20,15 @@ public class ImageToZpl {
 
     public static void main(String[] args) throws IOException {
 
+//        System.out.println(0xFF ^ 0);
+//        System.exit(1);
+
+//        System.out.println(minimizeSameWord("000000000000000000000000000000000000000003F"));
+//        System.exit(1);
         BufferedInputStream bis=null;
 
         try {
-            bis = new BufferedInputStream(new FileInputStream("/Users/guzy/Downloads/18A8675F-96A3-4F79-AE7B-CFDCB8FAF2F5.png"));
+            bis = new BufferedInputStream(new FileInputStream("/Users/guzy/Desktop/23.bmp"));
 
             BufferedImage srcImage = ImageIO.read(bis);
 
@@ -35,20 +41,33 @@ public class ImageToZpl {
 //                }
 //            }
 
-            //getGrayImage(srcImage);
 
+            String str = image2Zpl(srcImage);
 
-            DataBufferByte data=(DataBufferByte) srcImage.getRaster().getDataBuffer();
-
-            System.out.println(data.getSize());
-            byte[] result=data.getData();
+//            System.out.println(data.getSize());
+//            System.out.println(srcImage.getWidth()*srcImage.getHeight());
+//
+//            byte[] afterResult=result;
+//            if(BufferedImage.TYPE_3BYTE_BGR==srcImage.getType()){
+//                afterResult=new byte[srcImage.getWidth()*srcImage.getHeight()];
+//                for(int i=0;i<srcImage.getHeight();i++){
+//                    for(int j=0;j<srcImage.getWidth();j++){
+//                        int r=result[(i*srcImage.getWidth()+j)*3];
+//                        int g=result[(i*srcImage.getWidth()+j)*3+1];
+//                        int b=result[(i*srcImage.getWidth()+j)*3+2];
+//                        int luma=((r*299) + (g*587) +(b*114))/1000;
+//                        afterResult[i*srcImage.getWidth()+j]=(byte)luma;
+//                    }
+//                }
+//
+//            }
 //            bis.close();
 //
 //            bis = new BufferedInputStream(new FileInputStream("/Users/guzy/Desktop/2.png"));
 
             //imgDecode64(result);
 
-            System.out.println(getImage(srcImage,result));
+            System.out.println( str);
             //System.out.println("^XA"+ImageWrapper.getImage(new ImageIcon(srcImage,"test"), LanguageType.ZPLII, Charsets.UTF_8)+"^XZ");
         }finally {
             if(bis!=null){
@@ -57,68 +76,42 @@ public class ImageToZpl {
         }
     }
 
-    /**
-     * 图片字节数组,base64解码
-     * @param result
-     * @throws IOException
-     */
-    private static byte[] imgDecode64(byte[] result) throws IOException {
-        int tRecvCount=result.length;
-        char[]tChars=new char[tRecvCount];
-
-        for(int i=0;i<tRecvCount;i++)
-            tChars[i]=(char)result[i];
-
-        BASE64Decoder decoder = new BASE64Decoder();
-
-        //Base64解码
-        byte[] b = decoder.decodeBuffer(new String(result));
-        for (int i = 0; i < b.length; ++i) {
-            if (b[i] < 0) {//调整异常数据
-                b[i] += 256;
-            }
-        }
-        return b;
+    public static String image2Zpl(BufferedImage srcImage) {
+        DataBufferByte data=(DataBufferByte) getBinaryGrayImage(srcImage).getRaster().getDataBuffer();
+        byte[] result=data.getData();
+        return getImage(srcImage,result);
     }
 
-    private static void getGrayImage(BufferedImage srcImage) {
-        BufferedImage dstImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-//		ColorSpace grayCS=ColorSpace.getInstance(ColorSpace.CS_GRAY);
-//		ColorConvertOp colorConvertOp=new ColorConvertOp(grayCS,new RenderingHints());
-//		colorConvertOp.filter(srcImage,dstImage);
+    private static String minimizeSameWord(String str) {
+        Matcher matcher=MULTI_W.matcher(str);
+        while (matcher.find()){
+            String group=matcher.group();
+            int len=group.length();
+            String c="";
+            if(len>20){
+                c=Character.toString((char) ('f' + len / 20));
+            }
+            if(len%20>0){
+                c=c+Character.toString((char)('F'+len%20));
+            }
+
+            str=str.replaceFirst(group, c + group.charAt(0));
+        }
+        return str;
+    }
+
+    private static BufferedImage getBinaryGrayImage(BufferedImage srcImage) {
+        BufferedImage dstImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
         dstImage.getGraphics().drawImage(srcImage, 0, 0, null);
         for (int y = 0; y < dstImage.getHeight(); y++) {
             for (int x = 0; x < dstImage.getWidth(); x++) {
-               // Color pixel = new Color(dstImage.getRGB(x, y));
-                dstImage.setRGB(x, y, dstImage.getRGB(x, y));//new Color(getGray(pixel), getGray(pixel), getGray(pixel)).getRGB()
+                Color color = new Color(dstImage.getRGB(x, y));
+                //获取该点的像素的RGB的颜色
+                Color newColor = new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue());
+                dstImage.setRGB(x, y, newColor.getRGB());//new Color(getGray(pixel), getGray(pixel), getGray(pixel)).getRGB()
             }
         }
-        //int[]result=((DataBufferInt) dstImage.getRaster().getDataBuffer()).getData();
-    }
-
-    /**
-     * 缩小图片的字节数组
-     * @param srcImage
-     */
-    private static void minimizeRgbArr(BufferedImage srcImage) {
-        DataBufferByte data=(DataBufferByte) srcImage.getRaster().getDataBuffer();
-
-        byte[] result1=data.getData();
-        byte[] result=new byte[(result1.length+7)/8];
-        for(int i=0;i<result.length;i++){
-            int a=0;
-            int count=0;
-            for(int j=0;j<8;j++){
-                if(i*8+j<result1.length){
-                    a+=result1[i*8+j];
-                    count++;
-                }
-            }
-            if(count>0){
-                a=a/count;
-            }
-            result[i]=(byte)a;
-        }
+        return dstImage;
     }
 
 
@@ -152,6 +145,8 @@ public class ImageToZpl {
                 a=m.replaceFirst("!");
             }
 
+            a=minimizeSameWord(a);
+
             if(pre!=null && a.equals(pre)){
                 a=":";
             }else{
@@ -164,6 +159,8 @@ public class ImageToZpl {
 
 
     static Pattern ZEROS=Pattern.compile("0+$"),ONES=Pattern.compile("1+$");
+
+    static Pattern MULTI_W=Pattern.compile("([0-9A-Z])\\1{2,}");
 
     public static String[] byte2HexStr(byte[] b,int rowSize) {
         int len=b.length/rowSize;
